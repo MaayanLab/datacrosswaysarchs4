@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+    <head>
+        <meta name="viewport", content="width=device-width, initial-scale=1.0">
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="./css/main.css">
+        <title>Upload file</title>
+        <head>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+            <script src="./scripts/main.js"></script>
+            <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        </head>
+    </head>
+    <body>
+        <div id="content-wrapper">
+            <h2>Upload files</h2>
+            <div id="upload-wrapper">
+                <form id="read-upload-form">
+                    <input type="hidden" name="upload" value="RULKgC2F4SA">
+                    <input id="fileinput" type="file" multiple>
+                    <br><br>
+                    <button type="button" class="btn btn-lg btn-block btn-outline-primary mt-2" onclick="upload_file();">Upload Files</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
