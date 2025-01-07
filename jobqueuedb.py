@@ -14,9 +14,6 @@ from sqlalchemy.orm import relationship
 
 from dateutil.relativedelta import relativedelta
 
-import pandas as pd
-
-
 from sqlalchemy import func, case
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
