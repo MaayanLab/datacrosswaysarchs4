@@ -11,9 +11,10 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-from models import db, User, File, Collection, DownloadLog, Role, UserRole, Policy, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
+from models import db, Log, User, File, Collection, DownloadLog, Role, UserRole, Policy, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
 import dbutils
 import s3utils
+import ecsutils
 
 from middleware import login_required, upload_credentials, admin_required, accesskey_login, dev_login
 
@@ -135,6 +136,47 @@ def get_stats():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when retrieving stats"), 500
+
+@app.route('/api/log', methods = ["POST"])
+def post_log():
+    try:
+        user = dict(session).get('user', None)
+        data = request.get_json()
+        dbutils.create_log_entry(data, user)
+        return jsonify({"message": "log created"}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to create log"), 500
+
+@app.route('/api/log/categorycounts', methods = ["GET"])
+@cache.cached(timeout=60)
+def count_log():
+    try:
+        res = dbutils.get_log_category_count()
+        return jsonify({"counts": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve log counts"), 500
+
+@app.route('/api/pipeline/status', methods = ["GET"])
+def pipeline_staus():
+    try:
+        res = ecsutils.get_pipeline_status(conf["aws_ecs"])
+        return jsonify({"status": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve pipeline status"), 500
+
+@app.route('/api/pipeline/jobqueue', methods = ["GET"])
+@cache.cached(timeout=3600)
+def pipeline_job_queue():
+    try:
+        res = dbutils.get_pipeline_jobqueue(conf["pipeline_database"])
+        return jsonify({"jobs": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+
 
 # User API endpoints
 # - user [GET] -> list all users

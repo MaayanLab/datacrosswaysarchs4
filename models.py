@@ -104,6 +104,23 @@ class DownloadLog(db.Model):
     def __repr__(self):
         return f"<DownloadLog user_id={self.user_id} file_id={self.file_id} download_timestamp={self.download_timestamp}>"
 
+class Log(db.Model):
+    __tablename__ = 'logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, index=True, nullable=True)
+    log_category = db.Column(db.String, index=True, nullable=False)
+    log_entry = db.Column(db.String, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    
+    def __init__(self, log_category, log_entry):
+        self.log_category = log_category
+        self.log_entry = log_entry
+
+    def __repr__(self):
+        return f"Logs log_category={self.log_category} log_entry={self.log_entry} user_id={self.user_id} download_timestamp={self.timestamp}>"
+
+
 class Collection(db.Model):
     __tablename__ = 'collections'
     

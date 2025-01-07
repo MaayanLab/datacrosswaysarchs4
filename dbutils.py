@@ -1,5 +1,5 @@
 import traceback
-from app import db, session, User, File, Collection, DownloadLog, Role, UserRole, Policy, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
+from app import db, session, User, File, Collection, DownloadLog, Role, UserRole, Policy, Log, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
 import json
 import jsonschema
 from jsonschema import validate
@@ -16,6 +16,8 @@ from itertools import chain
 from functools import lru_cache
 import functools
 import re
+
+import jobqueuedb
 
 class TimedCache(object):
     def __init__(self, timeout=1):
@@ -1401,3 +1403,20 @@ def list_user_logs(offset, limit, user_id):
         })
     
     return log_entries, total_logs
+
+def create_log_entry(log_data, user):
+    log = Log(log_data["category"], log_data["entry"])
+    if user:
+        log.user_id = user["id"]
+    db.session.add(log)
+    db.session.commit()
+    return log
+
+def get_log_category_count():
+    category_counts = db.session.query(
+        Log.log_category, func.count(Log.log_category).label('count')
+    ).group_by(Log.log_category).all()
+    return {category: count for category, count in category_counts}
+
+def get_pipeline_jobqueue(creds):
+    return jobqueuedb.collect_quarterly_job_counts(creds)
