@@ -993,6 +993,16 @@ def logout():
         session.pop(key)
     return redirect('/logout')
 
+@app.route('/api/mailchimp/subscribe', methods=["POST"])
+def subscribe():
+    try:
+        data = request.get_json()
+        dbutils.subscribe(data, conf["mailchimp"])
+        return jsonify({"message": "subscribed to newsletter"})
+    except Exception:
+        return jsonify(message="An error occurred when subscribing"), 500
+
+
 @app.route('/api/user/authorize')
 def authorize():
     print(request.url)

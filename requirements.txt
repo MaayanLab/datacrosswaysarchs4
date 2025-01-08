@@ -16,3 +16,4 @@ sqlalchemy_json==0.5.0
 Werkzeug==2.0.3
 flask-swagger-ui==4.11.1
 apscheduler==3.10.4
+mailchimp_marketing==3.0.80

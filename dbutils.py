@@ -16,6 +16,8 @@ from itertools import chain
 from functools import lru_cache
 import functools
 import re
+from mailchimp_marketing.api_client import ApiClientError
+from mailchimp_marketing import Client
 
 import jobqueuedb
 
@@ -1433,3 +1435,20 @@ def add_version_file(data):
     )
     db.session.add(vf)
     db.session.commit()
+
+def subscribe(data, conf):
+    mailchimp = Client()
+    mailchimp.set_config({
+        "api_key": conf["key"],
+        "server": conf["zone"]
+    })
+    member_info = {
+        "email_address": data["email"],
+        "status": "subscribed",
+    }
+    list_id = conf["list_id"]
+    try:
+        response = mailchimp.lists.add_list_member(list_id, member_info)
+        print("response: {}".format(response))
+    except ApiClientError as error:
+        print("An exception occurred: {}".format(error.text))
