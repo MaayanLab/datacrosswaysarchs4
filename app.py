@@ -11,7 +11,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-from models import db, Log, User, File, Collection, DownloadLog, Role, UserRole, Policy, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
+from models import db, Log, VersionFile, User, File, Collection, DownloadLog, Role, UserRole, Policy, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
 import dbutils
 import s3utils
 import ecsutils
@@ -173,6 +173,16 @@ def pipeline_job_queue():
     try:
         res = dbutils.get_pipeline_jobqueue(conf["pipeline_database"])
         return jsonify({"jobs": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+
+@app.route('/api/versionfile', methods = ["POST"])
+def set_version_file():
+    try:
+        data = request.get_json()
+        dbutils.add_version_file(data)
+        return jsonify(message="version file added"), 200
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500

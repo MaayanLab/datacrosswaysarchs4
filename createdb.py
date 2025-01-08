@@ -1,9 +1,13 @@
 from app import db, User, Collection, Role
 import sys
 
-email= sys.argv[1]
-first_name = sys.argv[2]
-last_name = sys.argv[3]
+#email= sys.argv[1]
+#first_name = sys.argv[2]
+#last_name = sys.argv[3]
+
+email = "alexander.lachmann@gmail.com"
+first_name = "Alexander"
+last_name = "Lachmann"
 
 db.drop_all()
 db.create_all()

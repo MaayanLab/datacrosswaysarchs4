@@ -120,6 +120,26 @@ class Log(db.Model):
     def __repr__(self):
         return f"Logs log_category={self.log_category} log_entry={self.log_entry} user_id={self.user_id} download_timestamp={self.timestamp}>"
 
+class VersionFile(db.Model):
+    __tablename__ = 'VersionFile'
+    id = db.Column(db.Integer, primary_key=True)
+    version_major = db.Column(db.Integer, nullable=False)
+    version_minor = db.Column(db.Integer, nullable=False)
+    species = db.Column(db.String, nullable=False)
+    data_level = db.Column(db.String, nullable=False)
+    checksum = db.Column(db.String, nullable=False)
+    ensembl_annotation = db.Column(db.Integer, nullable=False)
+    file_size = db.Column(db.BigInteger(), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
+
+    def __init__(self, version_major, version_minor, species, data_level, checksum, ensembl_annotation, file_size):
+        self.version_major = version_major
+        self.version_minor = version_minor
+        self.species = species
+        self.data_level = data_level
+        self.checksum = checksum
+        self.ensembl_annotation = ensembl_annotation
+        self.file_size = file_size
 
 class Collection(db.Model):
     __tablename__ = 'collections'

@@ -1,5 +1,5 @@
 import traceback
-from app import db, session, User, File, Collection, DownloadLog, Role, UserRole, Policy, Log, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
+from app import db, session, User, File, Collection, DownloadLog, Role, UserRole, Policy, Log, VersionFile, RolePolicy, PolicyCollections, PolicyFiles, Accesskey
 import json
 import jsonschema
 from jsonschema import validate
@@ -1420,3 +1420,16 @@ def get_log_category_count():
 
 def get_pipeline_jobqueue(creds):
     return jobqueuedb.collect_quarterly_job_counts(creds)
+
+def add_version_file(data):
+    vf = VersionFile(
+        version_major=data["version_major"],
+        version_minor=data["version_minor"],
+        species=data.get("species"),
+        data_level=data.get("data_level"),
+        checksum=data.get("checksum"),
+        ensembl_annotation=data.get("ensembl_annotation"),
+        file_size=data["file_size"]
+    )
+    db.session.add(vf)
+    db.session.commit()
