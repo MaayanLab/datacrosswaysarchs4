@@ -148,7 +148,7 @@ def package_alignments():
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=search_checksum, trigger="interval", seconds=3600)
-scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=3600)
+#scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=3600)
 scheduler.start()
 
 @app.route('/api/stats', methods = ["GET"])
