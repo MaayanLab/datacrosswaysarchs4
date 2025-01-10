@@ -47,7 +47,7 @@ def scale_pipeline(cred, desired_capacity=0):
                 HonorCooldown=True  # Optional: set to False if you want to ignore cooldown periods
             )
             
-            print(f"Successfully scaled {cred["autoscaling_name"]} to {desired_capacity} instances.")
+            print(f"Successfully scaled {cred['autoscaling_name']} to {desired_capacity} instances.")
             print(response)  # You can log the response for more details
 
         except Exception as e:
