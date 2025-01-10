@@ -122,9 +122,33 @@ def search_checksum():
         except Exception as e:
             traceback.print_exc()
 
+def pipeline_scaling():
+    with app.app_context():
+        try:
+            print("Check pipeline for pending jobs")
+            cpu_count = ecsutils.get_pipeline_status(conf["aws_ecs"])
+            job_queue = dbutils.get_pipeline_jobqueue(conf["pipeline_database"])
+            pending_jobs = 0
+            for job in job_queue:
+                pending_jobs = pending_jobs + job["pending"]
+            
+            if (pending_jobs > 2000) and (cpu_count == 0):
+                print("up scaling suggested", pending_jobs, cpu_count)
+                ecsutils.scale_pipeline(conf["aws_ecs"], desired_capacity=conf["aws_ecs"]["scaling_size"])
+            elif (pending_jobs == 0) and (cpu_count > 0):
+                print("down scaling suggested", pending_jobs, cpu_count)
+                ecsutils.scale_pipeline(conf["aws_ecs"], desired_capacity=0)
+
+        except Exception as e:
+            traceback.print_exc()
+
+def package_alignments():
+    #when would it need not package data?
+    print("Package the data")
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=search_checksum, trigger="interval", seconds=15)
+scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=15)
 scheduler.start()
 
 @app.route('/api/stats', methods = ["GET"])

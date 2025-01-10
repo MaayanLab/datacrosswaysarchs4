@@ -52,7 +52,7 @@ def generate_quarters(start_year: int, start_month: int, end_date: datetime):
         # Move to the next quarter
         current += relativedelta(months=3)
 
-def collect_quarterly_job_counts(config, start_year: int = 2023, start_month: int = 1):
+def collect_quarterly_job_counts(config, start_year: int = 2023, start_month: int = 4):
     """
     Collect job counts for each quarter from start_date to today.
 

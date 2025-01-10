@@ -30,3 +30,25 @@ def get_pipeline_status(cred):
                           if instance['registeredResources'][0]['name'] == 'CPU')
     
     return total_cpu_count
+
+def scale_pipeline(cred, desired_capacity=0):
+        client = boto3.client(
+            'autoscaling',
+            region_name=cred["autoscaling_region"],
+            aws_access_key_id=cred["aws_id"],
+            aws_secret_access_key=cred["aws_key"],
+        )
+
+        try:
+            # Update the desired capacity of the Auto Scaling Group
+            response = client.set_desired_capacity(
+                AutoScalingGroupName=cred["autoscaling_name"],
+                DesiredCapacity=desired_capacity,
+                HonorCooldown=True  # Optional: set to False if you want to ignore cooldown periods
+            )
+            
+            print(f"Successfully scaled {cred["autoscaling_name"]} to {desired_capacity} instances.")
+            print(response)  # You can log the response for more details
+
+        except Exception as e:
+            print(f"Error scaling Auto Scaling Group: {e}")
