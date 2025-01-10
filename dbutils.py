@@ -1246,7 +1246,6 @@ def annotate_file(file_id, metadata):
     return(file)
 
 
-
 def meta_stat2(meta, path, stat):
     for k in meta.keys():
         if str(type(meta[k])) == "<class 'sqlalchemy_json.track.TrackedList'>":
