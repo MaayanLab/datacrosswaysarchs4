@@ -1430,9 +1430,14 @@ def add_version_file(data):
         data_level=data.get("data_level"),
         checksum=data.get("checksum"),
         ensembl_annotation=data.get("ensembl_annotation"),
-        file_size=data["file_size"]
+        file_size=data["file_size"],
+        samples=data["samples"]
     )
     db.session.add(vf)
+    db.session.commit()
+
+def delete_version_file(file_id):
+    VersionFile.query.filter_by(id=file_id).delete()
     db.session.commit()
 
 def get_version_file():

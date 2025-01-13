@@ -130,6 +130,7 @@ class VersionFile(db.Model):
     checksum = db.Column(db.String, nullable=False)
     ensembl_annotation = db.Column(db.Integer, nullable=False)
     file_size = db.Column(db.BigInteger(), nullable=False)
+    samples = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     def __init__(self, version_major, version_minor, species, data_level, checksum, ensembl_annotation, file_size):

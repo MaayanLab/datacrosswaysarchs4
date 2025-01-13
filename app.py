@@ -3,6 +3,7 @@ import traceback
 import json
 import requests
 import time
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from authlib.integrations.flask_client import OAuth
@@ -18,7 +19,6 @@ import ecsutils
 
 from middleware import login_required, upload_credentials, admin_required, accesskey_login, dev_login
 
-from datetime import timedelta
 
 from werkzeug.routing import BaseConverter
 from flask_caching import Cache
@@ -148,7 +148,9 @@ def package_alignments():
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=search_checksum, trigger="interval", seconds=3600)
-#scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=3600)
+
+start_time = datetime.now() + timedelta(seconds=3600)
+#scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=3600, next_run_time=start_time)
 scheduler.start()
 
 @app.route('/api/stats', methods = ["GET"])
@@ -209,7 +211,7 @@ def set_version_file():
         return jsonify(message="version file added"), 200
     except Exception:
         traceback.print_exc()
-        return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+        return jsonify(message="An error occurred when attempting to post versionfile"), 500
 
 @app.route('/api/versionfile', methods = ["GET"])
 def get_version_files():
@@ -218,7 +220,20 @@ def get_version_files():
         return jsonify(versionfiles=res), 200
     except Exception:
         traceback.print_exc()
-        return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+        return jsonify(message="An error occurred when attempting to retrieve version files"), 500
+
+@accesskey_login
+@dev_login
+@login_required
+@admin_required
+@app.route('/api/versionfile/<int:file_id>', methods = ["DELETE"])
+def delete_version_file(file_id):
+    try:
+        dbutils.delete_version_file(file_id)
+        return jsonify(message="file deleted"), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to delete versionfile"), 500
 
 
 # User API endpoints
