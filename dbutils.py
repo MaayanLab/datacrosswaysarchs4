@@ -1435,6 +1435,25 @@ def add_version_file(data):
     db.session.add(vf)
     db.session.commit()
 
+def get_version_file():
+    query = db.session.query(VersionFile)
+    version_files = query.all()
+    version_files_list = [
+        {
+            'id': vf.id,
+            'version_major': vf.version_major,
+            'version_minor': vf.version_minor,
+            'species': vf.species,
+            'data_level': vf.data_level,
+            'checksum': vf.checksum,
+            'ensembl_annotation': vf.ensembl_annotation,
+            'file_size': vf.file_size,
+            'timestamp': vf.timestamp,
+        } for vf in version_files
+    ]
+    
+    return version_files_list
+
 def subscribe(data, conf):
     mailchimp = Client()
     mailchimp.set_config({

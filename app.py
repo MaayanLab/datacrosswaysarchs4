@@ -211,6 +211,16 @@ def set_version_file():
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
 
+@app.route('/api/versionfile', methods = ["GET"])
+def get_version_files():
+    try:
+        data = request.get_json()
+        res = dbutils.get_version_filea(data)
+        return jsonify(versionfiles=res), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+
 
 # User API endpoints
 # - user [GET] -> list all users

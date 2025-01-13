@@ -52,3 +52,32 @@ def scale_pipeline(cred, desired_capacity=0):
 
         except Exception as e:
             print(f"Error scaling Auto Scaling Group: {e}")
+
+def discover_samples(cred):
+    """
+    Deploy an ECS task definition in a specified cluster.
+
+    :param cluster_name: The name of the ECS cluster.
+    :param task_definition: The task definition ARN (e.g., 'arn:aws:ecs:us-east-1:123456789012:task-definition/my-task:1').
+    :param count: The number of tasks to run (default is 1).
+    :return: Response from the run_task API call.
+    """
+    # Create an ECS client
+    ecs_client = boto3.client('ecs')
+
+    # Run the task
+    response = ecs_client.run_task(
+        cluster=cred["cluster"],
+        taskDefinition=cred["sample_discovery_task"],
+        count=1,
+        launchType='FARGATE',
+        networkConfiguration={
+            'awsvpcConfiguration': {
+                'subnets': ['subnet-cfe33fe2', 'subnet-4f801743', 'subnet-b01ddc8c', 'subnet-97f47bde', 'subnet-bd741fd8', 'subnet-594b9b02'],
+                'assignPublicIp': 'ENABLED',
+                'securityGroups': ['sg-6f7f9312'],
+            }
+        }
+    )
+    
+    return response

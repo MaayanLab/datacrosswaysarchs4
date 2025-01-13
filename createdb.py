@@ -27,3 +27,6 @@ user_1.roles.append(uploader_role)
 
 db.session.add(user_1)
 db.session.commit()
+
+
+print("done")
