@@ -133,7 +133,7 @@ class VersionFile(db.Model):
     samples = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-    def __init__(self, version_major, version_minor, species, data_level, checksum, ensembl_annotation, file_size):
+    def __init__(self, version_major, version_minor, species, data_level, checksum, ensembl_annotation, file_size, samples):
         self.version_major = version_major
         self.version_minor = version_minor
         self.species = species
@@ -141,6 +141,7 @@ class VersionFile(db.Model):
         self.checksum = checksum
         self.ensembl_annotation = ensembl_annotation
         self.file_size = file_size
+        self.samples = samples
 
 class Collection(db.Model):
     __tablename__ = 'collections'
