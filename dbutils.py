@@ -1451,7 +1451,6 @@ def get_version_file():
             'timestamp': vf.timestamp,
         } for vf in version_files
     ]
-    
     return version_files_list
 
 def subscribe(data, conf):

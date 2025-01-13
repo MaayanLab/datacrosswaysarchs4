@@ -215,7 +215,7 @@ def set_version_file():
 def get_version_files():
     try:
         data = request.get_json()
-        res = dbutils.get_version_filea(data)
+        res = dbutils.get_version_file(data)
         return jsonify(versionfiles=res), 200
     except Exception:
         traceback.print_exc()
