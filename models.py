@@ -123,8 +123,8 @@ class Log(db.Model):
 class VersionFile(db.Model):
     __tablename__ = 'VersionFile'
     id = db.Column(db.Integer, primary_key=True)
-    version_major = db.Column(db.Integer, nullable=False)
-    version_minor = db.Column(db.Integer, nullable=False)
+    version_major = db.Column(db.String, nullable=False)
+    version_minor = db.Column(db.String, nullable=False)
     species = db.Column(db.String, nullable=False)
     data_level = db.Column(db.String, nullable=False)
     checksum = db.Column(db.String, nullable=False)

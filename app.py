@@ -214,8 +214,7 @@ def set_version_file():
 @app.route('/api/versionfile', methods = ["GET"])
 def get_version_files():
     try:
-        data = request.get_json()
-        res = dbutils.get_version_file(data)
+        res = dbutils.get_version_file()
         return jsonify(versionfiles=res), 200
     except Exception:
         traceback.print_exc()
