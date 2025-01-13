@@ -1453,6 +1453,7 @@ def get_version_file():
             'checksum': vf.checksum,
             'ensembl_annotation': vf.ensembl_annotation,
             'file_size': vf.file_size,
+            'samples': vf.samples,
             'timestamp': vf.timestamp,
         } for vf in version_files
     ]
