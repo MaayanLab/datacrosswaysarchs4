@@ -5,6 +5,7 @@ import requests
 import time
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 from authlib.integrations.flask_client import OAuth
 
@@ -138,19 +139,51 @@ def pipeline_scaling():
             elif (pending_jobs == 0) and (cpu_count > 0):
                 print("down scaling suggested", pending_jobs, cpu_count)
                 ecsutils.scale_pipeline(conf["aws_ecs"], desired_capacity=0)
-
         except Exception as e:
             traceback.print_exc()
 
-def package_alignments():
-    #when would it need not package data?
-    print("Package the data")
+def sample_discovery():
+    with app.app_context():
+        try:
+            print("Sample discovery")
+            ecsutils.discover_samples(conf["aws_ecs"])
+        except Exception as e:
+            traceback.print_exc()
+
+def sample_packaging():
+    with app.app_context():
+        try:
+            print("Package samples")
+            print(" - start human gene")
+            print(" - start human transcript")
+            print(" - start mouse gene")
+            print(" - start mouse transcript")
+            ecsutils.package_samples(conf["aws_ecs"])
+        except Exception as e:
+            traceback.print_exc()
+
+now = datetime.now()
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+print("Current system time =", dt_string)
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=search_checksum, trigger="interval", seconds=3600)
 
 start_time = datetime.now() + timedelta(seconds=3600)
-#scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=3600, next_run_time=start_time)
+scheduler.add_job(func=pipeline_scaling, trigger="interval", seconds=3600, next_run_time=start_time)
+
+scheduler.add_job(
+    func=sample_discovery,
+    trigger=CronTrigger(day_of_week='fri', hour=17, minute=0),
+    id='sample_discovery_job'
+)
+
+scheduler.add_job(
+    func=sample_packaging,
+    trigger=CronTrigger(day_of_week='tue', day='1-7', hour=1, minute=0),
+    id='sample_packaging_job',
+)
+
 scheduler.start()
 
 @app.route('/api/stats', methods = ["GET"])
