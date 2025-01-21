@@ -216,6 +216,16 @@ def count_log():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve log counts"), 500
+    
+@app.route('/api/log/pipeline/tasks', methods = ["GET"])
+@cache.cached(timeout=60)
+def pipeline_log():
+    try:
+        res = dbutils.get_pipeline_log()
+        return jsonify({"log": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve pipeline log"), 500
 
 @app.route('/api/pipeline/status', methods = ["GET"])
 def pipeline_staus():

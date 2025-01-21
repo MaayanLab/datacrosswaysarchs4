@@ -1419,6 +1419,21 @@ def get_log_category_count():
     ).group_by(Log.log_category).all()
     return {category: count for category, count in category_counts}
 
+def get_pipeline_log():
+    pipeline_categories = [
+        'pipeline/samplediscovery',
+        'pipeline/packaging_human_gene',
+        'pipeline/packaging_human_transcript',
+        'pipeline/packaging_mouse_gene',
+        'pipeline/packaging_mouse_transcript'
+    ]
+    logs = {}
+    for category in pipeline_categories:
+        log_entry = Log.query.filter_by(log_category=category).order_by(Log.timestamp.desc()).first()
+        print(log_entry.__dict__["timestamp"], log_entry.__dict__["log_entry"])
+        logs[category] = {"date": str(log_entry.__dict__["timestamp"]), "entry": log_entry.__dict__["log_entry"]}
+    return logs
+
 def get_pipeline_jobqueue(creds):
     return jobqueuedb.collect_quarterly_job_counts(creds)
 
