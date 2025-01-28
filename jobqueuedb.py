@@ -77,7 +77,7 @@ def collect_quarterly_job_counts(config, start_year: int = 2023, start_month: in
     for start_date, end_date in generate_quarters(start_year, start_month, today):
         # Retrieve job counts
         try:
-            _, completed, failed, waiting, submitted = check_jobs_all(
+            res = check_jobs_all(
                 config,
                 verbose=False,
                 start_date=start_date,
@@ -95,10 +95,10 @@ def collect_quarterly_job_counts(config, start_year: int = 2023, start_month: in
         
         data.append({
             "year": quarter_label,
-            "success": completed,
-            "failed": failed,
-            "pending": waiting,
-            "submitted": submitted
+            "success": res["completed"],
+            "failed": res["failed"],
+            "pending": res["waiting"],
+            "submitted": res["submitted"]
         })
     
     return data
