@@ -201,6 +201,7 @@ def post_log():
     try:
         user = dict(session).get('user', None)
         data = request.get_json()
+        print(data)
         dbutils.create_log_entry(data, user)
         return jsonify({"message": "log created"}), 200
     except Exception:
@@ -228,6 +229,7 @@ def pipeline_log():
         return jsonify(message="An error occurred when attempting to retrieve pipeline log"), 500
 
 @app.route('/api/pipeline/status', methods = ["GET"])
+@cache.cached(timeout=60)
 def pipeline_staus():
     try:
         res = ecsutils.get_pipeline_status(conf["aws_ecs"])
@@ -245,6 +247,17 @@ def pipeline_job_queue():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+
+@app.route('/api/pipeline/overview', methods = ["GET"])
+@cache.cached(timeout=3600)
+def pipeline_job_overview():
+    try:
+        res = dbutils.get_pipeline_overview(conf["pipeline_database"])
+        return jsonify({"status": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve pipeline overview"), 500
+
 
 @app.route('/api/versionfile', methods = ["POST"])
 def set_version_file():

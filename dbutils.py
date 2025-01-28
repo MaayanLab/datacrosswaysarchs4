@@ -1437,6 +1437,9 @@ def get_pipeline_log():
 def get_pipeline_jobqueue(creds):
     return jobqueuedb.collect_quarterly_job_counts(creds)
 
+def get_pipeline_overview(creds):
+    return jobqueuedb.check_jobs_all(creds)
+
 def add_version_file(data):
     vf = VersionFile(
         version_major=data["version_major"],

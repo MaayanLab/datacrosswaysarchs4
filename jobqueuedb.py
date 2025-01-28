@@ -246,5 +246,4 @@ def check_jobs_all(
             print(f"failed: {failed}")
             print(f"completed: {completed}")
 
-        return datetime.now(), completed, failed, waiting, submitted
-    
+        return {"current_time":datetime.now(), "completed":completed, "failed":failed, "waiting":waiting, "submitted":submitted}
