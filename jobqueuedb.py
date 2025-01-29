@@ -247,3 +247,64 @@ def check_jobs_all(
             print(f"completed: {completed}")
 
         return {"current_time":datetime.now(), "completed":completed, "failed":failed, "waiting":waiting, "submitted":submitted}
+
+
+def get_pipeline_activity_recent(config):
+    DB_NAME = config["DB_NAME"]
+    DB_HOST = config["DB_HOST"]
+    DB_PORT = config["DB_PORT"]
+    DB_USER = config["DB_USER"]
+    DB_PASSWORD = config["DB_PASSWORD"]
+
+    SQLALCHEMY_DATABASE_URL = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_HOST+":"+DB_PORT+"/"+DB_NAME
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    Base = declarative_base()
+
+    def generate_uuid(self):
+        return str(shortuuid.ShortUUID().random(length=12))
+
+    class Job(Base):
+        __tablename__ = "jobs"
+        id = Column(Integer, primary_key=True, index=True)
+        uuid = Column(String, default=generate_uuid)
+        genome_index = Column(String)
+        result_bucket = Column(String)
+        status = Column(String, default="waiting")
+        status_message = Column(String)
+        batch = Column(Integer)
+        creation_date = Column(DateTime, default=datetime.now)
+        submission_date = Column(DateTime)
+        completion_date = Column(DateTime)
+
+    
+    db = SessionLocal()
+
+    twelve_hours_ago = datetime.now() - timedelta(hours=24)
+    current_jobs = (
+        db.query(Job)
+        .filter(Job.completion_date >= twelve_hours_ago)
+        .order_by(Job.creation_date)
+        .all()
+    )
+
+    bins = [[0, 0] for _ in range(24)]
+    now = datetime.now()
+
+    for job in current_jobs:
+        delta = now - job.completion_date
+        hours_ago = delta.total_seconds() / 3600
+        bin_index = int(hours_ago)
+        if bin_index >= 24:
+            bin_index = 24
+        # assuming completion_date is <= now, so delta is positive, hours_ago >=0
+        if 0 <= bin_index < 24:
+            if job.status == "completed":
+                bins[bin_index][0] +=1
+            else:
+                bins[bin_index][1] +=1
+    else:
+        pass
+    return bins

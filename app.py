@@ -258,6 +258,16 @@ def pipeline_job_overview():
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve pipeline overview"), 500
 
+@app.route('/api/pipeline/recent', methods = ["GET"])
+@cache.cached(timeout=60)
+def pipeline_job_recent():
+    try:
+        res = dbutils.pipeline_job_recent(conf["pipeline_database"])
+        return jsonify({"status": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve recent pipeline completions"), 500
+
 
 @app.route('/api/versionfile', methods = ["POST"])
 def set_version_file():

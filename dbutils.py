@@ -4,7 +4,7 @@ import json
 import jsonschema
 from jsonschema import validate
 import s3utils
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.orm import joinedload
 from sqlalchemy.types import Integer, Float
 from sqlalchemy import func
@@ -1439,6 +1439,9 @@ def get_pipeline_jobqueue(creds):
 
 def get_pipeline_overview(creds):
     return jobqueuedb.check_jobs_all(creds)
+
+def pipeline_job_recent(creds):
+    return jobqueuedb.get_pipeline_activity_recent(creds)
 
 def add_version_file(data):
     vf = VersionFile(
