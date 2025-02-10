@@ -180,7 +180,7 @@ scheduler.add_job(
 
 scheduler.add_job(
     func=sample_packaging,
-    trigger=CronTrigger(day_of_week='wed', day='1-7', hour=23, minute=0),
+    trigger=CronTrigger(day_of_week='wed', day='1-7', hour=19, minute=44),
     id='sample_packaging_job',
 )
 
