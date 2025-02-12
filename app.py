@@ -209,7 +209,7 @@ def post_log():
         return jsonify(message="An error occurred when attempting to create log"), 500
 
 @app.route('/api/log/categorycounts', methods = ["GET"])
-@cache.cached(timeout=60)
+@cache.cached(timeout=30)
 def count_log():
     try:
         res = dbutils.get_log_category_count()
