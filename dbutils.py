@@ -314,7 +314,7 @@ def update_user(user, user_id=None):
         if "affiliation" in user:
             dbuser.affiliation = user["affiliation"]
         if "storage_quota" in user:
-            dbuser.affiliation = user["storage_quota"]
+            dbuser.storage_quota = user["storage_quota"]
         if "orcid_id" in user:
             if len(user["orcid_id"]) > 0:
                 dbuser.orcid_id = user["orcid_id"]
