@@ -50,13 +50,15 @@ def read_config():
     f = open('secrets/config.json')
     return json.load(f)
 
+conf = read_config()
+
 app = Flask(__name__, 
         static_url_path='/api/static',
         static_folder='static',
         template_folder='templates')
 
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
-app.secret_key = "ffx#xkj$WWs2"
+app.secret_key = conf["appkey"]
 app.config['SESSION_COOKIE_NAME'] = 'google-login-session'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=20)
 
@@ -64,7 +66,7 @@ app.url_map.converters['int_list'] = IntListConverter
 
 cache = Cache(app, config={"CACHE_TYPE": "simple"})
 
-conf = read_config()
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://"+conf["database"]["user"]+":"+conf["database"]["pass"]+"@"+conf["database"]["server"]+":"+conf["database"]["port"]+"/"+conf["database"]["name"]
 app.config['SQLALCHEMY_POOL_SIZE'] = 40
