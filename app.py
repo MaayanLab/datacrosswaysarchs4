@@ -226,7 +226,7 @@ def count_log():
 @admin_required
 @app.route('/api/log/show', methods = ["GET"])
 @cache.cached(timeout=30)
-def count_log():
+def show_log():
     try:
         res = dbutils.get_log_category_entries()
         return jsonify({"counts": res}), 200
