@@ -219,7 +219,40 @@ def count_log():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve log counts"), 500
-    
+
+@accesskey_login
+@dev_login
+@login_required
+@admin_required
+@app.route('/api/log/show', methods = ["GET"])
+@cache.cached(timeout=30)
+def count_log():
+    try:
+        res = dbutils.get_log_category_entries()
+        return jsonify({"counts": res}), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve log counts"), 500
+
+@app.route('/api/logs/downloads', methods=["GET"])
+@cache.cached(timeout=60)
+def download_logs():
+    try:
+        # Get pagination parameters from query string, default to 0 offset and 10 limit
+        offset = int(request.args.get('offset', 0))
+        limit = int(request.args.get('limit', 10))
+        
+        # Call the list_all_logs function
+        logs, total = dbutils.list_all_logs(offset, limit)
+        
+        return jsonify({
+            "logs": logs,
+            "total": total
+        }), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify({"message": "An error occurred when attempting to retrieve download logs"}), 500
+
 @app.route('/api/log/pipeline/tasks', methods = ["GET"])
 @cache.cached(timeout=60)
 def pipeline_log():
@@ -290,11 +323,11 @@ def get_version_files():
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve version files"), 500
 
+@app.route('/api/versionfile/<int:file_id>', methods = ["DELETE"])
 @accesskey_login
 @dev_login
 @login_required
 @admin_required
-@app.route('/api/versionfile/<int:file_id>', methods = ["DELETE"])
 def delete_version_file(file_id):
     try:
         dbutils.delete_version_file(file_id)

@@ -16,6 +16,7 @@ from itertools import chain
 from functools import lru_cache
 import functools
 import re
+from collections import defaultdict
 from mailchimp_marketing.api_client import ApiClientError
 from mailchimp_marketing import Client
 
@@ -1407,6 +1408,30 @@ def list_user_logs(offset, limit, user_id):
     
     return log_entries, total_logs
 
+def list_all_logs(offset, limit):
+    """
+    List all download logs.
+
+    :param offset: The starting point for the query.
+    :param limit: The maximum number of logs to return.
+    :return: A tuple containing the list of all logs and the total count of logs.
+    """
+    query = db.session.query(DownloadLog)
+    total_logs = query.count()
+    
+    logs = query.order_by(DownloadLog.download_timestamp.desc()).offset(offset).limit(limit).all()
+    log_entries = []
+    
+    for log in logs:
+        log_entries.append({
+            "id": log.id,
+            "user_id": log.user_id,
+            "file_id": log.file_id,
+            "download_timestamp": log.download_timestamp
+        })
+    
+    return log_entries, total_logs
+
 def create_log_entry(log_data, user):
     log = Log(log_data["category"], log_data["entry"])
     if user:
@@ -1420,6 +1445,19 @@ def get_log_category_count():
         Log.log_category, func.count(Log.log_category).label('count')
     ).group_by(Log.log_category).all()
     return {category: count for category, count in category_counts}
+
+def get_log_category_entries():
+    log_entries = db.session.query(Log).all()
+    grouped_entries = defaultdict(list)
+    for entry in log_entries:
+        grouped_entries[entry.log_category].append({
+            'id': entry.id,
+            'user_id': entry.user_id,
+            'log_category': entry.log_category,
+            'log_entry': entry.log_entry,
+            'timestamp': entry.timestamp.isoformat()
+        })
+    return dict(grouped_entries)
 
 def get_pipeline_log():
     pipeline_categories = [
