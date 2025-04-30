@@ -1475,7 +1475,7 @@ def get_pipeline_log():
     return logs
 
 def get_pipeline_jobqueue(creds):
-    return jobqueuedb.collect_quarterly_job_counts(creds)
+    return jobqueuedb.collect_monthly_job_counts(creds)
 
 def get_pipeline_overview(creds):
     return jobqueuedb.check_jobs_all(creds)
