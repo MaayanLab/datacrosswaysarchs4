@@ -52,40 +52,6 @@ def generate_quarters(start_year: int, start_month: int, end_date: datetime):
         # Move to the next quarter
         current += relativedelta(months=3)
 
-def generate_months(start_year: int, start_month: int, today: datetime):
-    """
-    Generate start and end dates for each month from start_year/start_month to today.
-
-    Args:
-        start_year (int): The starting year.
-        start_month (int): The starting month (1 for Jan, 2 for Feb, etc.).
-        today (datetime): The current date.
-
-    Returns:
-        list: List of tuples (start_date, end_date) for each month, formatted as 'MM/YYYY'.
-    """
-    # Initialize the start date
-    current_date = datetime(start_year, start_month, 1)
-    
-    # Initialize the result list
-    months = []
-    
-    # Loop until the current date exceeds today
-    while current_date <= today:
-        # Calculate the end of the month
-        end_date = current_date + relativedelta(months=1) - relativedelta(days=1)
-        
-        # Format dates as MM/YYYY
-        start_date_str = f"{current_date.month}/{current_date.year}"
-        end_date_str = f"{end_date.month}/{end_date.year}"
-        
-        # Append to the list
-        months.append((start_date_str, end_date_str))
-        
-        # Move to the next month
-        current_date += relativedelta(months=1)
-    
-    return months
 
 def collect_quarterly_job_counts(config, start_year: int = 2023, start_month: int = 4):
     """
@@ -138,29 +104,59 @@ def collect_quarterly_job_counts(config, start_year: int = 2023, start_month: in
     
     return data
 
-def collect_monthly_job_counts(config, start_year: int = 2024, start_month: int = 1):
+
+def generate_months(today: datetime):
     """
-    Collect job counts for each month from start_date to today.
+    Generate start and end dates for each month from one year before today to today.
 
     Args:
-        start_year (int): The starting year.
-        start_month (int): The starting month (1 for Jan, 2 for Feb, etc.).
+        today (datetime): The current date.
 
     Returns:
-        pd.DataFrame: DataFrame containing job counts per month.
+        list: List of tuples (start_date, end_date) for each month, formatted as 'MM/YYYY'.
+    """
+    # Calculate the start date (one year before today)
+    start_date = today - relativedelta(years=1)
+    current_date = datetime(start_date.year, start_date.month, 1)
+    
+    # Initialize the result list
+    months = []
+    
+    # Loop until the current date exceeds today
+    while current_date <= today:
+        # Calculate the end of the month
+        end_date = current_date + relativedelta(months=1) - relativedelta(days=1)
+        
+        # Format dates as MM/YYYY
+        start_date_str = f"{current_date.month}/{current_date.year}"
+        end_date_str = f"{end_date.month}/{end_date.year}"
+        
+        # Append to the list
+        months.append((start_date_str, end_date_str))
+        
+        # Move to the next month
+        current_date += relativedelta(months=1)
+    
+    return months
+
+def collect_monthly_job_counts(config):
+    """
+    Collect job counts for each month from one year before today to today.
+
+    Args:
+        config: Configuration object for job count retrieval.
+
+    Returns:
+        list: List of dictionaries containing job counts per month.
     """
     # Get the current date
     today = datetime.now()
-    
-    # Validate start_month
-    if start_month not in range(1, 13):
-        raise ValueError("start_month must be between 1 and 12")
     
     # Initialize a list to store data
     data = []
     
     # Generate months
-    for start_date, end_date in generate_months(start_year, start_month, today):
+    for start_date, end_date in generate_months(today):
         # Retrieve job counts
         try:
             res = check_jobs_all(
