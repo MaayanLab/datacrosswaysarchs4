@@ -19,6 +19,7 @@ import re
 from collections import defaultdict
 from mailchimp_marketing.api_client import ApiClientError
 from mailchimp_marketing import Client
+from datetime import datetime, timedelta
 
 import jobqueuedb
 
@@ -1536,3 +1537,6 @@ def subscribe(data, conf):
         print("response: {}".format(response))
     except ApiClientError as error:
         print("An exception occurred: {}".format(error.text))
+
+def retrycount(creds, timedelta_days):
+    return jobqueuedb.check_jobs_all(creds, start_date=datetime.now() - timedelta(days=timedelta_days), end_date=datetime.now())
