@@ -287,7 +287,7 @@ def pipeline_retry_jobs():
 @cache.cached(timeout=3600)
 def pipeline_retry_jobs_count():
     try:
-        delta_time = request.args.get("days", default=0)
+        delta_time = int(request.args.get("days", default='100'))
         res = dbutils.retrycount(conf["pipeline_database"], delta_time)
         return jsonify({"jobs": res}), 200
     except Exception:
