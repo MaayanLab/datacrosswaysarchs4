@@ -1538,5 +1538,8 @@ def subscribe(data, conf):
     except ApiClientError as error:
         print("An exception occurred: {}".format(error.text))
 
+def retryjobs(creds, timedelta_days):
+    return jobqueuedb.retry_jobs_delta(creds, start_date=(datetime.now() - timedelta(days=timedelta_days)), end_date=datetime.now())
+
 def retrycount(creds, timedelta_days):
     return jobqueuedb.check_jobs_delta(creds, start_date=(datetime.now() - timedelta(days=timedelta_days)), end_date=datetime.now())

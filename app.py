@@ -274,10 +274,10 @@ def pipeline_staus():
         return jsonify(message="An error occurred when attempting to retrieve pipeline status"), 500
 
 @app.route('/api/pipeline/retryjobs', methods = ["GET"])
-@cache.cached(timeout=3600)
 def pipeline_retry_jobs():
     try:
-        res = dbutils.get_pipeline_jobqueue(conf["pipeline_database"])
+        delta_time = int(request.args.get("days", default='100'))
+        res = dbutils.retry_jobs(conf["pipeline_database"], delta_time)
         return jsonify({"jobs": res}), 200
     except Exception:
         traceback.print_exc()
@@ -449,7 +449,6 @@ def post_user_bulk():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when creating users"), 500
-
 
 @app.route('/api/user', methods = ["PATCH"])
 @accesskey_login

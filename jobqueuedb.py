@@ -327,8 +327,6 @@ def check_jobs_delta(
 
         return {"current_time":datetime.now(), "completed":completed, "failed":failed, "waiting":waiting, "submitted":submitted}
 
-
-
 def check_jobs_all(
     config,
     verbose: bool = False,
@@ -488,3 +486,45 @@ def get_pipeline_activity_recent(config):
     else:
         pass
     return bins
+
+
+def retry_jobs(config, time_delta):
+    DB_NAME = config["DB_NAME"]
+    DB_HOST = config["DB_HOST"]
+    DB_PORT = config["DB_PORT"]
+    DB_USER = config["DB_USER"]
+    DB_PASSWORD = config["DB_PASSWORD"]
+
+    SQLALCHEMY_DATABASE_URL = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_HOST+":"+DB_PORT+"/"+DB_NAME
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    Base = declarative_base()
+
+    def generate_uuid(self):
+        return str(shortuuid.ShortUUID().random(length=12))
+
+    class Job(Base):
+        __tablename__ = "jobs"
+        id = Column(Integer, primary_key=True, index=True)
+        uuid = Column(String, default=generate_uuid)
+        genome_index = Column(String)
+        result_bucket = Column(String)
+        status = Column(String, default="waiting")
+        status_message = Column(String)
+        batch = Column(Integer)
+        creation_date = Column(DateTime, default=datetime.now)
+        submission_date = Column(DateTime)
+        completion_date = Column(DateTime)
+
+    dd = SessionLocal() 
+    jobs = dd.query(Job)
+    
+    if time_delta:
+        one_week_ago = datetime.now() - timedelta(days=time_delta)
+        jobs = jobs.filter(Job.creation_date > one_week_ago)
+    
+    jobs.filter(Job.status.in_(["submitted", "failed"])).update({Job.status: "waiting"}, synchronize_session=False)
+    dd.commit()
+    return {"status": "failed/submitted samples set to waiting for reprocessing"}
