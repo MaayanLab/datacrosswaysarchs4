@@ -232,8 +232,8 @@ def get_job_info(config, time_delta=3000):
 def check_jobs_all(
     config,
     verbose: bool = False,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None
+    start_date = None,
+    end_date = None
 ) -> Tuple[datetime, int, int, int, int]:
     """
     Retrieve counts of jobs by status within a specified date range.
@@ -294,9 +294,9 @@ def check_jobs_all(
         if start_date and end_date:
             try:
                 # Parse start_date as the first day of the start month
-                start = datetime.strptime(start_date, "%m/%Y")
+                start = start_date
                 # Parse end_date as the first day of the month after the end month
-                end = datetime.strptime(end_date, "%m/%Y") + timedelta(days=31)
+                end = end_date
                 end = end.replace(day=1)
             except ValueError as e:
                 raise ValueError("start_date and end_date should be in 'm/YYYY' format (e.g., '4/2020')") from e
