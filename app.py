@@ -284,7 +284,6 @@ def pipeline_retry_jobs():
         return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
 
 @app.route('/api/pipeline/retrycount', methods = ["GET"])
-@cache.cached(timeout=3600)
 def pipeline_retry_jobs_count():
     try:
         delta_time = int(request.args.get("days", default='100'))
