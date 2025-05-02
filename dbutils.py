@@ -1539,4 +1539,4 @@ def subscribe(data, conf):
         print("An exception occurred: {}".format(error.text))
 
 def retrycount(creds, timedelta_days):
-    return jobqueuedb.check_jobs_all(creds, start_date=datetime.now() - timedelta(days=timedelta_days), end_date=datetime.now())
+    return jobqueuedb.check_jobs_delta(creds, start_date=(datetime.now() - timedelta(days=timedelta_days)), end_date=datetime.now())

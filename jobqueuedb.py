@@ -229,7 +229,7 @@ def get_job_info(config, time_delta=3000):
     dd.close()
     return {"time": datetime.now(), "completed": int(completed), "failed": int(failed), "waiting": int(waiting), "submitted": int(submitted)}
 
-def check_jobs_all(
+def check_jobs_delta(
     config,
     verbose: bool = False,
     start_date = None,
@@ -297,6 +297,106 @@ def check_jobs_all(
                 start = start_date
                 # Parse end_date as the first day of the month after the end month
                 end = end_date
+            except ValueError as e:
+                raise ValueError("start_date and end_date should be in 'm/YYYY' format (e.g., '4/2020')") from e
+
+            # Apply the date range filter
+            query = query.filter(
+                Job.creation_date >= start,
+                Job.creation_date < end
+            )
+        elif start_date or end_date:
+            raise ValueError("Both start_date and end_date must be provided together.")
+
+        # Execute the query
+        result = query.one()
+
+        # Extract counts, defaulting to 0 if None
+        waiting = result.waiting or 0
+        failed = result.failed or 0
+        completed = result.completed or 0
+        submitted = result.submitted or 0
+
+        # Verbose output
+        if verbose:
+            print(f"Query Time: {datetime.now()}")
+            print(f"waiting: {waiting}")
+            print(f"submitted: {submitted}")
+            print(f"failed: {failed}")
+            print(f"completed: {completed}")
+
+        return {"current_time":datetime.now(), "completed":completed, "failed":failed, "waiting":waiting, "submitted":submitted}
+
+
+
+def check_jobs_all(
+    config,
+    verbose: bool = False,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+) -> Tuple[datetime, int, int, int, int]:
+    """
+    Retrieve counts of jobs by status within a specified date range.
+
+    Args:
+        verbose (bool): If True, prints the counts and current datetime.
+        start_date (Optional[str]): Start date in "m/YYYY" format (e.g., "4/2020").
+        end_date (Optional[str]): End date in "m/YYYY" format (e.g., "5/2020").
+
+    Returns:
+        Tuple containing:
+            - Current datetime,
+            - Count of completed jobs,
+            - Count of failed jobs,
+            - Count of waiting jobs,
+            - Count of submitted jobs.
+    """
+
+    DB_NAME = config["DB_NAME"]
+    DB_HOST = config["DB_HOST"]
+    DB_PORT = config["DB_PORT"]
+    DB_USER = config["DB_USER"]
+    DB_PASSWORD = config["DB_PASSWORD"]
+
+    SQLALCHEMY_DATABASE_URL = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_HOST+":"+DB_PORT+"/"+DB_NAME
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
+
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    Base = declarative_base()
+
+    def generate_uuid(self):
+        return str(shortuuid.ShortUUID().random(length=12))
+
+    class Job(Base):
+        __tablename__ = "jobs"
+        id = Column(Integer, primary_key=True, index=True)
+        uuid = Column(String, default=generate_uuid)
+        genome_index = Column(String)
+        result_bucket = Column(String)
+        status = Column(String, default="waiting")
+        status_message = Column(String)
+        batch = Column(Integer)
+        creation_date = Column(DateTime, default=datetime.now)
+        submission_date = Column(DateTime)
+        completion_date = Column(DateTime)
+
+    with SessionLocal() as session:
+        # Initialize the base query
+        query = session.query(
+            func.sum(case([(Job.status == "waiting", 1)], else_=0)).label("waiting"),
+            func.sum(case([(Job.status == "failed", 1)], else_=0)).label("failed"),
+            func.sum(case([(Job.status == "completed", 1)], else_=0)).label("completed"),
+            func.sum(case([(Job.status == "submitted", 1)], else_=0)).label("submitted")
+        )
+
+        # If a date range is provided, parse and apply the filter
+        if start_date and end_date:
+            try:
+                # Parse start_date as the first day of the start month
+                start = datetime.strptime(start_date, "%m/%Y")
+                # Parse end_date as the first day of the month after the end month
+                end = datetime.strptime(end_date, "%m/%Y") + timedelta(days=31)
                 end = end.replace(day=1)
             except ValueError as e:
                 raise ValueError("start_date and end_date should be in 'm/YYYY' format (e.g., '4/2020')") from e
