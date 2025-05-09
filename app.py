@@ -270,6 +270,10 @@ def pipeline_staus():
         return jsonify(message="An error occurred when attempting to retrieve pipeline status"), 500
 
 @app.route('/api/pipeline/retryjobs', methods = ["GET"])
+@accesskey_login
+@dev_login
+@login_required
+@admin_required
 def pipeline_retry_jobs():
     try:
         delta_time = int(request.args.get("days", default='100'))
@@ -287,6 +291,20 @@ def pipeline_task_status():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve taskstatus"), 500
+    
+@app.route('/api/pipeline/launchtask', methods = ["GET"])
+@accesskey_login
+@dev_login
+@login_required
+@admin_required
+def launch_task():
+    task_arn = int(request.args.get('task', 0))
+    try:
+        res = ecsutils.launch_task(conf, task_arn)
+        return jsonify(res), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to launch task"), 500
 
 @app.route('/api/pipeline/retrycount', methods = ["GET"])
 def pipeline_retry_jobs_count():
