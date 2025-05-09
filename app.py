@@ -282,7 +282,7 @@ def pipeline_retry_jobs():
 @app.route('/api/pipeline/taskstatus', methods = ["GET"])
 def pipeline_task_status():
     try:
-        res = ecsutils.get_task_status(conf)
+        res = ecsutils.get_task_pipeline_status(conf)
         return jsonify(res), 200
     except Exception:
         traceback.print_exc()

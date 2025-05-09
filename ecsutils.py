@@ -187,7 +187,7 @@ def get_task_status(cred, task_definition_arn):
             'error': f"Error querying tasks: {str(e)}"
         }
 
-def get_task_status(cred):
+def get_task_pipeline_status(cred):
     # Organized dictionary for tasks
     organized_tasks = {
         'sample_discovery': cred['aws_ecs']['sample_discovery_task'],
