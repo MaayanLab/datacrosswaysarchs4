@@ -298,10 +298,13 @@ def pipeline_task_status():
 @login_required
 @admin_required
 def launch_task():
-    task_arn = int(request.args.get('task', 0))
+    task_arn = request.args.get('task', "missing")
     try:
-        res = ecsutils.launch_task(conf, task_arn)
-        return jsonify(res), 200
+        if task_arn != "missing":
+            res = ecsutils.launch_task(conf, task_arn)
+            return jsonify(res), 200
+        else:
+            return jsonify(message="An error occurred when attempting to launch task, missing task arn"), 500
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to launch task"), 500
