@@ -205,16 +205,16 @@ def get_task_pipeline_status(cred):
 
     # Get status for each task
     status_report = {
-        'sample_discovery': get_task_status(organized_tasks['sample_discovery']),
+        'sample_discovery': get_task_status(cred, organized_tasks['sample_discovery']),
         'human': {
-            'gene': get_task_status(organized_tasks['human']['gene']),
-            'transcript': get_task_status(organized_tasks['human']['transcript']),
-            'tpm': get_task_status(organized_tasks['human']['tpm'])
+            'gene': get_task_status(cred, organized_tasks['human']['gene']),
+            'transcript': get_task_status(cred, organized_tasks['human']['transcript']),
+            'tpm': get_task_status(cred, organized_tasks['human']['tpm'])
         },
         'mouse': {
-            'gene': get_task_status(organized_tasks['mouse']['gene']),
-            'transcript': get_task_status(organized_tasks['mouse']['transcript']),
-            'tpm': get_task_status(organized_tasks['mouse']['tpm'])
+            'gene': get_task_status(cred, organized_tasks['mouse']['gene']),
+            'transcript': get_task_status(cred, organized_tasks['mouse']['transcript']),
+            'tpm': get_task_status(cred, organized_tasks['mouse']['tpm'])
         }
     }
 
