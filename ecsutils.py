@@ -1,6 +1,8 @@
 import boto3
 import json
 import app
+from botocore.exceptions import ClientError
+from datetime import datetime
 
 def get_pipeline_status(cred):
     ecs_client = boto3.client(
@@ -117,3 +119,103 @@ def package_samples(cred):
         responses.append(response)
     
     return responses
+
+
+def get_task_status(cred, task_definition_arn):
+    """
+    Get the status of a task for a given task definition ARN.
+    Returns a status object with task_arn, status (running/offline), created_at, and optional error.
+    """
+    try:
+        ecs_client = boto3.client('ecs',
+                    region_name="us-east-1",
+                    aws_access_key_id=cred["aws_ecs"]["aws_id"],
+                    aws_secret_access_key=cred["aws_ecs"]["aws_key"],
+                )
+        
+        # List tasks associated with the task definition in the cluster
+        response = ecs_client.list_tasks(
+            cluster="archs4packaging",
+            family=task_definition_arn.split('/')[-1].split(':')[0]  # Extract family name
+        )
+        
+        task_arns = response.get('taskArns', [])
+        if not task_arns:
+            return {
+                'task_arn': task_definition_arn,
+                'status': 'offline',
+                'created_at': 'N/A'
+            }
+
+        # Describe tasks to get their status
+        tasks_response = ecs_client.describe_tasks(
+            cluster="archs4packaging",
+            tasks=task_arns
+        )
+        
+        # If multiple tasks, select the most recent based on created_at
+        most_recent_task = None
+        latest_time = None
+        for task in tasks_response.get('tasks', []):
+            created_at = task.get('createdAt')
+            if created_at and (latest_time is None or created_at > latest_time):
+                most_recent_task = task
+                latest_time = created_at
+        
+        if most_recent_task:
+            task_arn = most_recent_task['taskArn']
+            ecs_status = most_recent_task['lastStatus']
+            status = 'running' if ecs_status in ['RUNNING', 'PENDING', 'STARTING'] else 'offline'
+            created_at = str(most_recent_task.get('createdAt', 'N/A'))
+            return {
+                'task_arn': task_arn,
+                'status': status,
+                'created_at': created_at
+            }
+        
+        return {
+            'task_arn': task_definition_arn,
+            'status': 'offline',
+            'created_at': 'N/A'
+        }
+
+    except ClientError as e:
+        return {
+            'task_arn': task_definition_arn,
+            'status': 'offline',
+            'created_at': 'N/A',
+            'error': f"Error querying tasks: {str(e)}"
+        }
+
+def get_task_status(cred):
+    # Organized dictionary for tasks
+    organized_tasks = {
+        'sample_discovery': cred['aws_ecs']['sample_discovery_task'],
+        'human': {
+            'gene': next(t for t in cred['aws_ecs']['packaging_tasks'] if 'human_gene' in t),
+            'transcript': next(t for t in cred['aws_ecs']['packaging_tasks'] if 'human_transcript' in t),
+            'tpm': next(t for t in cred['aws_ecs']['packaging_tpm_tasks'] if 'human_tpm' in t)
+        },
+        'mouse': {
+            'gene': next(t for t in cred['aws_ecs']['packaging_tasks'] if 'mouse_gene' in t),
+            'transcript': next(t for t in cred['aws_ecs']['packaging_tasks'] if 'mouse_transcript' in t),
+            'tpm': next(t for t in cred['aws_ecs']['packaging_tpm_tasks'] if 'mouse_tpm' in t)
+        }
+    }
+
+    # Get status for each task
+    status_report = {
+        'sample_discovery': get_task_status(organized_tasks['sample_discovery']),
+        'human': {
+            'gene': get_task_status(organized_tasks['human']['gene']),
+            'transcript': get_task_status(organized_tasks['human']['transcript']),
+            'tpm': get_task_status(organized_tasks['human']['tpm'])
+        },
+        'mouse': {
+            'gene': get_task_status(organized_tasks['mouse']['gene']),
+            'transcript': get_task_status(organized_tasks['mouse']['transcript']),
+            'tpm': get_task_status(organized_tasks['mouse']['tpm'])
+        }
+    }
+
+    return status_report

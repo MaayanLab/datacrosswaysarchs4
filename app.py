@@ -155,11 +155,6 @@ def sample_discovery():
 def sample_packaging():
     with app.app_context():
         try:
-            print("Package samples")
-            print(" - start human gene")
-            print(" - start human transcript")
-            print(" - start mouse gene")
-            print(" - start mouse transcript")
             ecsutils.package_samples(conf["aws_ecs"])
         except Exception as e:
             traceback.print_exc()
@@ -282,6 +277,16 @@ def pipeline_retry_jobs():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve pipeline job queue info"), 500
+
+@app.route('/api/pipeline/taskstatus', methods = ["GET"])
+def pipeline_task_status():
+    try:
+        res = ecsutils.get_task_status(conf)
+        return jsonify(res), 200
+    except Exception:
+        traceback.print_exc()
+        return jsonify(message="An error occurred when attempting to retrieve taskstatus"), 500
+
 
 @app.route('/api/pipeline/retrycount', methods = ["GET"])
 def pipeline_retry_jobs_count():
