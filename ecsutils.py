@@ -235,7 +235,7 @@ def launch_task(cred, task_arn):
                 )
 
     response = ecs_client.run_task(
-        cluster=cred["packaging_cluster"],
+        cluster=cred["aws_ecs"]["packaging_cluster"],
         taskDefinition=task_arn,
         count=1,
         launchType='FARGATE',
