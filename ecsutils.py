@@ -135,7 +135,7 @@ def get_task_status(cred, task_definition_arn):
         
         # List tasks associated with the task definition in the cluster
         response = ecs_client.list_tasks(
-            cluster="archs4packaging",
+            cluster=cred["aws_ecs"]["packaging_cluster"],
             family=task_definition_arn.split('/')[-1].split(':')[0]  # Extract family name
         )
         
@@ -149,7 +149,7 @@ def get_task_status(cred, task_definition_arn):
 
         # Describe tasks to get their status
         tasks_response = ecs_client.describe_tasks(
-            cluster="archs4packaging",
+            cluster=cred["aws_ecs"]["packaging_cluster"],
             tasks=task_arns
         )
         

@@ -258,6 +258,7 @@ def pipeline_log():
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve pipeline log"), 500
 
+
 @app.route('/api/pipeline/status', methods = ["GET"])
 @cache.cached(timeout=60)
 def pipeline_staus():
@@ -286,7 +287,6 @@ def pipeline_task_status():
     except Exception:
         traceback.print_exc()
         return jsonify(message="An error occurred when attempting to retrieve taskstatus"), 500
-
 
 @app.route('/api/pipeline/retrycount', methods = ["GET"])
 def pipeline_retry_jobs_count():
