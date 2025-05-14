@@ -86,6 +86,40 @@ def discover_samples(cred):
     
     return response
 
+def package_samples_tpm(cred):
+    """
+    Deploy an ECS task definition in a specified cluster.
+
+    :param cluster_name: The name of the ECS cluster.
+    :return: Response from the run_task API call.
+    """
+    # Create an ECS client
+    ecs_client = boto3.client('ecs',
+                    region_name="us-east-1",
+                    aws_access_key_id=cred["aws_id"],
+                    aws_secret_access_key=cred["aws_key"],
+                )
+
+    # Run the tasks
+    responses = []
+    for task in cred["packaging_tpm_tasks"]:
+        response = ecs_client.run_task(
+            cluster=cred["packaging_cluster"],
+            taskDefinition=task,
+            count=1,
+            launchType='FARGATE',
+            networkConfiguration={
+                'awsvpcConfiguration': {
+                    'subnets': ['subnet-cfe33fe2', 'subnet-4f801743', 'subnet-b01ddc8c', 'subnet-97f47bde', 'subnet-bd741fd8', 'subnet-594b9b02'],
+                    'assignPublicIp': 'ENABLED',
+                    'securityGroups': ['sg-6f7f9312'],
+                }
+            }
+        )
+        responses.append(response)
+    
+    return responses
+
 def package_samples(cred):
     """
     Deploy an ECS task definition in a specified cluster.
